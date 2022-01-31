@@ -1,11 +1,11 @@
-# retext-capitalizations
+# retext-capitalization
 
-A [retext](https://github.com/retextjs/retext) plugin to discourage the usage of emoji(s).
+A [retext](https://github.com/retextjs/retext) plugin to encourage the use of [sentence case](https://writer.com/blog/sentence-case/).
 
 ## Install
 
 ```sh
-npm install retext-capitalizations
+npm install retext-capitalization
 ```
 
 ## Use
@@ -16,7 +16,7 @@ import retextCapitalization from "./index.js";
 
 retext()
   .use(retextCapitalization)
-  .process("This is some text ✨ with emojis 😂 sprinkled in 😏.")
+  .process("i want to watch a movie about Mars.")
   .then((text) => {
     console.error(text.messages);
   });

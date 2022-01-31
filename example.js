@@ -3,9 +3,7 @@ import retextCapitalization from "./index.js";
 
 retext()
   .use(retextCapitalization)
-  .process(
-    "this is some text ✨ with emojis 😂 sprinkled in 😏. What is the NerdGraph Plural of emoji anyway 🧐? 🤷🏽"
-  )
+  .process("i want to watch a movie about Mars.")
   .then((text) => {
     console.error(text.messages);
   });
