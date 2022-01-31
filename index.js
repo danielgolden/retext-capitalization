@@ -69,11 +69,14 @@ export default function retextCapitalization() {
                 wordFirstChar === wordFirstChar.toUpperCase();
               const wordLowerCased =
                 word.charAt(0).toLowerCase() + word.slice(1);
+              const wordIsSetInAllCaps = word === word.toUpperCase();
 
               actual = word;
               expected = [wordLowerCased];
 
-              if (wordIsCaptialized) {
+              // if it's captialized and _not_ set in all caps.
+              // This way we avoid providing feedback on acronyms
+              if (wordIsCaptialized && !wordIsSetInAllCaps) {
                 // because for some reason the array doesn't have
                 // the normal array methods by default 🤔
                 const myExceptions = [...exceptions];
