@@ -1,7 +1,7 @@
 import { visit } from "unist-util-visit";
 import { is, convert } from "unist-util-is";
 import { pointStart, pointEnd } from "unist-util-position";
-import exceptions from "./exceptions";
+import exceptions from "./exceptions.js";
 
 export default function retextCapitalization() {
   return (tree, file) => {
@@ -35,12 +35,12 @@ export default function retextCapitalization() {
             firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
 
           let actual = firstWord;
-          let expected = firstWordCapitalized;
+          let expected = [firstWordCapitalized];
 
           if (!firstWordIsCaptilized) {
             Object.assign(
               file.message(
-                `Expected "${firstWordCapitalized}", not "${actual}"`,
+                `Expected the first word in the sentence to be capitalized. Like "${firstWordCapitalized}", not "${actual}"`,
                 {
                   start: pointStart(firstWordNode),
                   end: pointEnd(firstWordNode),
@@ -71,7 +71,7 @@ export default function retextCapitalization() {
                 word.charAt(0).toLowerCase() + word.slice(1);
 
               actual = word;
-              expected = wordLowerCased;
+              expected = [wordLowerCased];
 
               if (wordIsCaptialized) {
                 // because for some reason the array doesn't have
@@ -87,7 +87,7 @@ export default function retextCapitalization() {
                 if (!wordIsException) {
                   Object.assign(
                     file.message(
-                      `Expected "${wordLowerCased}", not "${actual}"`,
+                      `Unless "${actual}" is a proper noun, it shouldn't be capitalized ("${wordLowerCased}")`,
                       {
                         start: pointStart(wordNode),
                         end: pointEnd(wordNode),
