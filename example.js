@@ -3,7 +3,7 @@ import retextCapitalization from "./index.js";
 
 retext()
   .use(retextCapitalization)
-  .process("i want to watch a movie about Mars.")
+  .process("Check out new relic.")
   .then((text) => {
     console.error(text.messages);
   });

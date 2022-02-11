@@ -1,5 +1,8 @@
 // List originally pulled from https://en.wikipedia.org/wiki/Wikipedia:List_of_English_contractions
 const exceptions = [
+  "New",
+  "Relic",
+  "One",
   "NerdGraph",
   "GraphQL",
   "Figma",
@@ -11,7 +14,7 @@ const exceptions = [
   "Lambda",
   "AI",
   "CLI",
-  "linux",
+  "Linux",
   "Ubuntu",
   "OS",
   "SLO",
@@ -66,6 +69,18 @@ const exceptions = [
   "HAProxy",
   "HTTPS",
   "Quickstart",
+  "BitBucket",
+  "GitLab",
+  "GitHub",
+  "Trello",
+  "Asana",
+  "Teams",
+  "Slack",
+  "Pixie",
+  "Google",
+  "Apple",
+  "Microsoft",
+  "Windows",
 ];
 
 export default exceptions;
