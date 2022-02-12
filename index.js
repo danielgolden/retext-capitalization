@@ -125,7 +125,33 @@ export default function retextCapitalization() {
 
     search(tree, list, (match, _, _1, phrase) => {
       const actual = toString(match)
-      const expected = schema[phrase]
+      let expected = [schema[phrase]]
+
+      // The search function performs a fuzzy search on the string in question
+      // ignoring casing, apostrophes, etc. This is a check too make sure
+      // this isn't a false positive due to casing.
+      const isFalsePositive = () => {
+        let output = false
+
+        let testSubject = typeof expected[0] === 'string' ? expected : expected[0]
+
+        return testSubject.some((expectation) => {
+          return expectation === actual
+        })
+      }
+      
+      // if it's a false positive, stop everything
+      if (isFalsePositive()) {
+        return
+      }
+
+      // exected always needs to be an array, so ensure that it is
+      if (typeof expected === 'string') {
+        expected = [expected]
+      } else if (Array.isArray(expected)) {
+        expected = expected[0]
+      }
+
 
       Object.assign(
         file.message(
@@ -136,7 +162,7 @@ export default function retextCapitalization() {
           {start: pointStart(match[0]), end: pointEnd(match[match.length - 1])},
           [source, phrase.replace(/\s+/g, '-').toLowerCase()].join(':')
         ),
-        {actual, expected: [expected], url}
+        {actual, expected: [...expected], url}
       )
     })
   };

@@ -164,6 +164,7 @@ export const schema = {
   "Browser Monitoring": 'browser monitoring',
   "Browser monitoring": 'browser monitoring',
   "Containers": 'containers',
+  "Dashboard": 'dashboard',
   "Dashboards": 'dashboards',
   "Data Explorer": 'data explorer',
   "Data explorer": 'data explorer',
