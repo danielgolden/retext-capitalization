@@ -11,121 +11,17 @@ import {schema} from './schema.js'
 
 const list = Object.keys(schema)
 const source = "retext-capitalization";
-const url = 'https://github.com/danielgolden/retext-capitalization#readme'
+const url = 'https://docs.newrelic.com/docs/style-guide/capitalization/product-capability-feature-usage/#when-to-use-title-case'
 
 export default function retextCapitalization() {
   return (tree, file) => {
-    // Check all capitalized words against a list of execptions
-    // Recursively walk the syntaxt tree of the text
-    // visit(tree, "ParagraphNode", (node) => {
-    //   const sentences = node.children;
-    //   let ruleId = "";
+    const treeValue = (tree) => {
+      return tree
+    }
 
-    //   // for each sentence
-    //   sentences.forEach((sentence, index) => {
-    //     // for each sentence child
-    //     console.log(sentence);
-    //     if (is(sentence, "SentenceNode")) {
-    //       // store all WordNodes in an array
-    //       const wordNodes = sentence.children.filter((sentenceChild) => {
-    //         return is(sentenceChild, "WordNode");
-    //       });
-
-    //       // ==============================
-    //       // Expects captialized first word
-    //       // ==============================
-
-    //       const firstWordNode = wordNodes[0];
-    //       const firstWord = firstWordNode.children[0].value;
-    //       console.log(firstWord);
-    //       const firstWordFirstChar = firstWord.charAt(0);
-    //       const firstWordIsCaptilized =
-    //         firstWordFirstChar === firstWordFirstChar.toUpperCase();
-    //       const firstWordCapitalized =
-    //         firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
-
-    //       let actual = firstWord;
-    //       let expected = [firstWordCapitalized];
-
-    //       if (!firstWordIsCaptilized) {
-    //         Object.assign(
-    //           file.message(
-    //             `Expected the first word in the sentence to be capitalized. Like "${firstWordCapitalized}", not "${actual}"`,
-    //             {
-    //               start: pointStart(firstWordNode),
-    //               end: pointEnd(firstWordNode),
-    //             },
-    //             [source, firstWord].join(":")
-    //           ),
-    //           {
-    //             actual,
-    //             expected,
-    //             note: "",
-    //             url: "https://one-core.datanerd.us/foundation/design/writing/capitalization/",
-    //           }
-    //         );
-    //       }
-
-    //       // ===========================================
-    //       // Expects only proper nouns to be capitalized
-    //       // ===========================================
-
-    //       wordNodes.forEach((wordNode, index) => {
-    //         // Skip the first word
-    //         if (index > 0) {
-    //           const word = wordNode.children[0].value;
-    //           const wordFirstChar = word.charAt(0);
-    //           const wordIsCaptialized =
-    //             wordFirstChar === wordFirstChar.toUpperCase();
-    //           const wordLowerCased =
-    //             word.charAt(0).toLowerCase() + word.slice(1);
-    //           const wordIsSetInAllCaps = word === word.toUpperCase();
-
-    //           actual = word;
-    //           expected = [wordLowerCased];
-
-    //           // if it's captialized and _not_ set in all caps.
-    //           // This way we avoid providing feedback on acronyms
-    //           if (wordIsCaptialized && !wordIsSetInAllCaps) {
-    //             // because for some reason the array doesn't have
-    //             // the normal array methods by default 🤔
-    //             const myExceptions = [...exceptions];
-
-    //             // is the word in the list of exceptions
-    //             const wordIsException = myExceptions.some(
-    //               (exception) => word === exception
-    //             );
-
-    //             // if the word isn't included in the exceptions list
-    //             if (!wordIsException) {
-    //               Object.assign(
-    //                 file.message(
-    //                   `Unless "${actual}" is a proper noun, it shouldn't be capitalized ("${wordLowerCased}")`,
-    //                   {
-    //                     start: pointStart(wordNode),
-    //                     end: pointEnd(wordNode),
-    //                   },
-    //                   [source, actual].join(":")
-    //                 ),
-    //                 {
-    //                   actual,
-    //                   expected,
-    //                   note: "",
-    //                   url: "https://one-core.datanerd.us/foundation/design/writing/capitalization/",
-    //                 }
-    //               );
-    //               // return file;
-    //             }
-    //           }
-    //         }
-    //       });
-    //     }
-    //   });
-    // });
-
-    search(tree, list, (match, _, _1, phrase) => {
+    search(tree, list, (match, index, parent, phrase) => {
       const actual = toString(match)
-      let expected = [schema[phrase]]
+      let expected = schema[phrase]
 
       // The search function performs a fuzzy search on the string in question
       // ignoring casing, apostrophes, etc. This is a check too make sure
@@ -133,7 +29,7 @@ export default function retextCapitalization() {
       const isFalsePositive = () => {
         let output = false
 
-        let testSubject = typeof expected[0] === 'string' ? expected : expected[0]
+        let testSubject = Array.isArray(expected) ? expected : [expected]
 
         return testSubject.some((expectation) => {
           return expectation === actual
@@ -148,8 +44,25 @@ export default function retextCapitalization() {
       // exected always needs to be an array, so ensure that it is
       if (typeof expected === 'string') {
         expected = [expected]
-      } else if (Array.isArray(expected)) {
-        expected = expected[0]
+      }
+
+      // TODO: If "Observability" is a part of an accepted phrase like
+      // "Instant Observability" don't throw an error.
+
+      if (actual === 'Observability') {
+        // Make a new array that includes the word before "Observability"
+        // and the word "Observability itself". Store it in `contextOfActual`
+        let contextOfActual = parent.children.map((item, index, array) => {
+            if (item === match[0]) {
+                return [array[index -2], array[index -1], item]
+            } else {
+                return false
+            }
+        }).filter(item => item)[0]
+
+        if (toString(contextOfActual) === 'Instant Observability') {
+          return null
+        }
       }
 
 
@@ -162,7 +75,7 @@ export default function retextCapitalization() {
           {start: pointStart(match[0]), end: pointEnd(match[match.length - 1])},
           [source, phrase.replace(/\s+/g, '-').toLowerCase()].join(':')
         ),
-        {actual, expected: [...expected], url}
+        {actual, expected, url}
       )
     })
   };
