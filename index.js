@@ -89,7 +89,7 @@ export default function retextCapitalization() {
 
       // check for false positives 
       if (
-        checkForFalsePositive('Observability', 1, 'Instant Observability')
+        checkForFalsePositive('Observability', 1, 'Instant Observability') ||
         checkForFalsePositive('I/O', 1, 'Relic I/O')
       ) {
         return null
