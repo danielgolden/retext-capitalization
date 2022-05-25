@@ -5,7 +5,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "repository": {
     "type": "git",
@@ -27,9 +31,15 @@
     "nlcst-to-string": "^3.1.0",
     "quotation": "^2.0.2",
     "retext": "^8.1.0",
+    "retext-pos": "^4.1.0",
     "unist-util-is": "^5.1.1",
     "unist-util-position": "^4.0.1",
     "unist-util-visit": "^4.1.0",
     "vfile-reporter-json": "^3.1.0"
+  },
+  "devDependencies": {
+    "husky": "^8.0.1",
+    "lint-staged": "^12.4.1",
+    "prettier": "2.6.2"
   }
 }
