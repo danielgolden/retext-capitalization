@@ -196,7 +196,7 @@ export default function retextCapitalization() {
 
       getImproperlyCapitalizedWords.forEach((word) => {
         const actual = wordAsString(word);
-        const expected = wordAsString(word).toLowerCase();
+        const expected = [wordAsString(word).toLowerCase()];
 
         Object.assign(
           file.message(
