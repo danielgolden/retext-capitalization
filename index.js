@@ -7,6 +7,7 @@ import { search } from "nlcst-search";
 import { toString } from "nlcst-to-string";
 import { quotation } from "quotation";
 import { schema } from "./schema.js";
+import exceptions from "./exceptions.js";
 
 const list = Object.keys(schema);
 const source = "retext-capitalization";
@@ -162,7 +163,15 @@ export default function retextCapitalization() {
           (word) => !isAlreadySuggested(word)
         );
 
-        const capitalizedWords = wordsNotYetSuggested.filter((word) => {
+        const wordsMinusExceptions = wordsNotYetSuggested.filter((word) => {
+          const existsInExceptions = exceptions.some((exception) => {
+            return exception.toLowerCase() === wordAsString(word).toLowerCase();
+          });
+
+          return !existsInExceptions;
+        });
+
+        const capitalizedWords = wordsMinusExceptions.filter((word) => {
           return wordAsString(word)[0] === wordAsString(word)[0].toUpperCase();
         });
 

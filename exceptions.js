@@ -1,6 +1,8 @@
 // List originally pulled from https://en.wikipedia.org/wiki/Wikipedia:List_of_English_contractions
 const exceptions = [
   "I",
+  "I'm",
+  "I’m",
   "New",
   "Relic",
   "One",
