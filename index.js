@@ -143,7 +143,9 @@ export default function retextCapitalization() {
     // Create a suggestion if all of the following are true for the word:
     // 1. Is not a proper noun
     // 2. Is not in the included in schema.js,
-    // 3. Is not the frist word of a sentance
+    // 3. Is not the first word of a sentance
+    // 4. Is not in the list of exceptions
+    // 5. Is not a number
     visit(tree, "SentenceNode", (sentence) => {
       const wordAsString = (word) => {
         return sourceString.substring(
@@ -154,7 +156,9 @@ export default function retextCapitalization() {
 
       const getImproperlyCapitalizedWords = (() => {
         const words = sentence.children.filter((child) => {
-          return child.type === "WordNode";
+          // Because we also don't want to return a suggestion/report
+          // for numbers.
+          return child.type === "WordNode" && isNaN(wordAsString(child));
         });
 
         // Because we don't to check words that have already been
