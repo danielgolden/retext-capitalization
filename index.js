@@ -18,12 +18,11 @@ export default function retextCapitalization() {
   return (tree, file) => {
     const sourceString = file.value;
 
-    /*
-      Checks if the provided capitalized word is already a part of a suggestion
-      @param {Object} word - the current word object
-      @return {Boolean} Whether it already exists as a suggestion
-    */
-
+    /*!
+     * Checks if the provided capitalized word is already a part of a suggestion
+     * @param {Object} word - the current word object
+     * @return {Boolean} Whether it already exists as a suggestion
+     */
     const isAlreadySuggested = (word) => {
       return file.messages.some((message) => {
         const isAfterStartOfExistingSuggestion =
@@ -35,6 +34,17 @@ export default function retextCapitalization() {
           isAfterStartOfExistingSuggestion && isBeforeEndOfExistingSuggestion
         );
       });
+    };
+
+    /*!
+     *  Checks if the provided capitalized word is a proper noun
+     *  @param {Object} word - the current word object
+     *  @return {Boolean} Whether it a proper noun
+     */
+    const isProperNoun = (word) => {
+      return (
+        word.data.partOfSpeech === "NNP" || word.data.partOfSpeech === "NNPS"
+      );
     };
 
     // Check the string against the contents of schema.js
@@ -154,14 +164,14 @@ export default function retextCapitalization() {
         );
       };
 
-      const getImproperlyCapitalizedWords = (() => {
+      const improperlyCapitalizedWords = (() => {
         const words = sentence.children.filter((child) => {
           // Because we also don't want to return a suggestion/report
           // for numbers.
           return child.type === "WordNode" && isNaN(wordAsString(child));
         });
 
-        // Because we don't to check words that have already been
+        // Because we don't want to check words that have already been
         // suggested/flagged by the previous search function
         const wordsNotYetSuggested = words.filter(
           (word) => !isAlreadySuggested(word)
@@ -175,16 +185,9 @@ export default function retextCapitalization() {
           return !existsInExceptions;
         });
 
-        const capitalizedWords = wordsMinusExceptions.filter((word) => {
+        let capitalizedWords = wordsMinusExceptions.filter((word) => {
           return wordAsString(word)[0] === wordAsString(word)[0].toUpperCase();
         });
-
-        const isProperNoun = (word) => {
-          return (
-            word.data.partOfSpeech === "NNP" ||
-            word.data.partOfSpeech === "NNPS"
-          );
-        };
 
         const isFirstWordOfSentence = (word) => {
           const firstWordPosition = words[0].position.start.offset;
@@ -192,22 +195,29 @@ export default function retextCapitalization() {
           return firstWordPosition == currentWordPosition;
         };
 
-        const isNewRelicTerm = (word) => {
-          const newRelicTerms = Object.keys(schema);
-
-          return newRelicTerms.some((newRelicTerm) => {
-            return (
-              wordAsString(word).toLowerCase() === newRelicTerm.toLowerCase()
-            );
-          });
+        // Because sometimes the retext-pos plugin gets it wrong
+        // See all part of speech tags: https://github.com/dariusk/pos-js
+        const properNounCorrections = {
+          Data: "NN",
         };
 
+        capitalizedWords = capitalizedWords.map((word) => {
+          if (properNounCorrections[wordAsString(word)]) {
+            word.data.partOfSpeech = properNounCorrections[wordAsString(word)];
+          }
+          return word;
+        });
+
         return capitalizedWords.filter((word) => {
+          console.log(
+            `${word.children[0].value} is proper noun ===`,
+            isProperNoun(word)
+          );
           return !isFirstWordOfSentence(word) && !isProperNoun(word);
         });
       })();
 
-      getImproperlyCapitalizedWords.forEach((word) => {
+      improperlyCapitalizedWords.forEach((word) => {
         const actual = wordAsString(word);
         const expected = [wordAsString(word).toLowerCase()];
 
