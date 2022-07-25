@@ -53,17 +53,56 @@ export default function retextCapitalization() {
       let expected = schema[phrase];
       let checkForFalsePositive = "";
 
+      const matchIsFromBeginningOfSentence = () => {
+        const firstChildOfMatch = match[0];
+        const startPositionOfParent = parent.position.start.offset;
+        const startPositionOfMatch = firstChildOfMatch.position.start.offset;
+        const matchIsFromBeginningOfSentence =
+          startPositionOfMatch === startPositionOfParent;
+
+        return matchIsFromBeginningOfSentence;
+      };
+
       // The search function performs a fuzzy search on the string in question
       // ignoring casing, apostrophes, etc. This is a check too make sure
       // this isn't a false positive due to casing.
       const isFalsePositive = () => {
-        let output = false;
+        const falsePositiveDueToCasing = () => {
+          let testSubject = Array.isArray(expected) ? expected : [expected];
 
-        let testSubject = Array.isArray(expected) ? expected : [expected];
+          return testSubject.some((expectation) => {
+            return expectation === actual;
+          });
+        };
 
-        return testSubject.some((expectation) => {
-          return expectation === actual;
-        });
+        const falsePositiveDueToBeginningOfSentence = () => {
+          if (!matchIsFromBeginningOfSentence()) {
+            return false;
+          } else {
+            const matchAsString = toString(match);
+
+            if (Array.isArray(expected)) {
+              return expected.some((replacement) => {
+                // Is the replacement === the match when the replacement matches
+                // the casing of the match.
+                return (
+                  replacement[0].toUpperCase() + replacement.substring(1) ===
+                  matchAsString
+                );
+              });
+            } else {
+              return (
+                expected[0].toUpperCase() + expected.substring(1) ===
+                matchAsString
+              );
+            }
+          }
+        };
+
+        if (falsePositiveDueToCasing()) return true;
+        if (falsePositiveDueToBeginningOfSentence()) return true;
+
+        return false;
       };
 
       // if it's a false positive, stop everything
@@ -88,7 +127,6 @@ export default function retextCapitalization() {
           console.error(
             `"checkContext" expects the argument "matchesToCheck" to be an array or string'`
           );
-          console.log(typeof matchesToCheck);
           return null;
         }
 
@@ -134,19 +172,32 @@ export default function retextCapitalization() {
         return null;
       }
 
+      // Because we need to make sure that don't recommend uncapitalizing
+      // the first letter of words at the beginning of a sentence.
+      const replacements = (() => {
+        if (matchIsFromBeginningOfSentence()) {
+          return expected.map(
+            (replacement) =>
+              replacement[0].toUpperCase() + replacement.substring(1)
+          );
+        } else {
+          return expected;
+        }
+      })();
+
       Object.assign(
         file.message(
           "Replace " +
             quotation(actual, "`") +
             " with " +
-            quotation(expected, "`"),
+            quotation(replacements, "`"),
           {
             start: pointStart(match[0]),
             end: pointEnd(match[match.length - 1]),
           },
           [source, phrase.replace(/\s+/g, "-").toLowerCase()].join(":")
         ),
-        { actual, expected, url }
+        { actual, expected: replacements, url }
       );
     });
 
@@ -165,11 +216,28 @@ export default function retextCapitalization() {
       };
 
       const improperlyCapitalizedWords = (() => {
+        // Because we also don't want to return a suggestion/report
+        // for numbers.
         const words = sentence.children.filter((child) => {
-          // Because we also don't want to return a suggestion/report
-          // for numbers.
-          return child.type === "WordNode" && isNaN(wordAsString(child));
+          const containsNumber = (str) => {
+            return /\d/.test(str);
+          };
+          return (
+            child.type === "WordNode" && containsNumber(wordAsString(child))
+          );
         });
+
+        /*!
+         *  Checks if the provided word is the first in the sentence
+         *  @param {Array} words - A collection of the words in the sentence
+         *  @param {Object} word - the word object in question
+         *  @return {Boolean} Whether it a proper noun
+         */
+        const isFirstWordOfSentence = (words, word) => {
+          const firstWordPosition = words[0].position.start.offset;
+          const currentWordPosition = word.position.start.offset;
+          return firstWordPosition === currentWordPosition;
+        };
 
         // Because we don't want to check words that have already been
         // suggested/flagged by the previous search function
@@ -189,12 +257,6 @@ export default function retextCapitalization() {
           return wordAsString(word)[0] === wordAsString(word)[0].toUpperCase();
         });
 
-        const isFirstWordOfSentence = (word) => {
-          const firstWordPosition = words[0].position.start.offset;
-          const currentWordPosition = word.position.start.offset;
-          return firstWordPosition == currentWordPosition;
-        };
-
         // Because sometimes the retext-pos plugin gets it wrong
         // See all part of speech tags: https://github.com/dariusk/pos-js
         const properNounCorrections = {
@@ -209,11 +271,7 @@ export default function retextCapitalization() {
         });
 
         return capitalizedWords.filter((word) => {
-          console.log(
-            `${word.children[0].value} is proper noun ===`,
-            isProperNoun(word)
-          );
-          return !isFirstWordOfSentence(word) && !isProperNoun(word);
+          return !isFirstWordOfSentence(words, word) && !isProperNoun(word);
         });
       })();
 

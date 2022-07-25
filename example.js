@@ -5,7 +5,7 @@ import retextCapitalization from "./index.js";
 retext()
   .use(retextPos)
   .use(retextCapitalization)
-  .process(`Go to Add More Data`)
+  .process(`I know instant observability`)
   .then((text) => {
     console.error(text.messages);
   });

@@ -3,10 +3,13 @@ const exceptions = [
   "I",
   "I'm",
   "I’m",
+  "I’ve",
+  "I've",
   "New",
   "Relic",
   "One",
   "NerdGraph",
+  "Nerdpack",
   "GraphQL",
   "Figma",
   "UI",
@@ -27,6 +30,7 @@ const exceptions = [
   "NRQL",
   "Pi-hole",
   "DNS",
+  "RedHat",
   "Redis",
   "SDK",
   "API",
@@ -84,6 +88,14 @@ const exceptions = [
   "Apple",
   "Microsoft",
   "Windows",
+  "Git",
+  "PR",
+  "PRs",
+  "Android",
+  "Go", // The programming language
+  "DevOps",
+  "CPU",
+  "Nginx",
 ];
 
 export default exceptions;
