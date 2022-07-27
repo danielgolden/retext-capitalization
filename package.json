@@ -1,6 +1,6 @@
 {
   "name": "retext-capitalization",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "A retext plugin to encourage the use of sentence case",
   "type": "module",
   "main": "index.js",
