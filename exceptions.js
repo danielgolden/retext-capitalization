@@ -17,6 +17,7 @@ const exceptions = [
   "APM",
   "Kubernetes",
   "AWS",
+  "NPM",
   "Lambda",
   "AI",
   "CLI",
@@ -96,6 +97,19 @@ const exceptions = [
   "DevOps",
   "CPU",
   "Nginx",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "IDE",
+  "CDN",
 ];
 
 export default exceptions;
