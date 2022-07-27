@@ -222,8 +222,9 @@ export default function retextCapitalization() {
           const containsNumber = (str) => {
             return /\d/.test(str);
           };
+
           return (
-            child.type === "WordNode" && containsNumber(wordAsString(child))
+            child.type === "WordNode" && !containsNumber(wordAsString(child))
           );
         });
 
